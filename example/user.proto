@@ -1,0 +1,30 @@
+syntax = "proto3";
+package hzhrpc;
+
+
+option cc_generic_services = true; // 生成服务类和rpc方法描述, 默认不生成
+
+message ResultCode
+{
+    int32 errcode = 1;
+    bytes errmsg = 2;
+}
+
+
+// 定义登录请求消息类型 name pwd
+message LoginRequest
+{
+    bytes name = 1;
+    bytes pwd = 2;
+}
+
+// 定义登录响应消息类型
+message LoginResponse
+{
+    ResultCode result = 1;
+    bool success = 3;
+}
+
+service UserServiceRpc {
+    rpc Login(LoginRequest) returns (LoginResponse);
+}

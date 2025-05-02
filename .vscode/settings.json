@@ -83,5 +83,6 @@
         "typeinfo": "cpp",
         "valarray": "cpp"
     },
-    "git.ignoreLimitWarning": true
+    "git.ignoreLimitWarning": true,
+    "C_Cpp.default.compilerPath": "/usr/bin/g++"
 }

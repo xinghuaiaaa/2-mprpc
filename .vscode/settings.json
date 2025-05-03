@@ -81,7 +81,12 @@
         "scoped_allocator": "cpp",
         "shared_mutex": "cpp",
         "typeinfo": "cpp",
-        "valarray": "cpp"
+        "valarray": "cpp",
+        "charconv": "cpp",
+        "csetjmp": "cpp",
+        "rope": "cpp",
+        "slist": "cpp",
+        "syncstream": "cpp"
     },
     "git.ignoreLimitWarning": true,
     "C_Cpp.default.compilerPath": "/usr/bin/g++"

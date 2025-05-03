@@ -1,0 +1,63 @@
+syntax = "proto3"; //声明protobuf的版本
+
+package hzhpro; // 声明代码所在的包(例如c++就是namespace)
+
+// 定义下面的选项, 表示生成的service服务类和rpc方法描述, 默认不生成
+option cc_generic_services = true;
+
+
+message ResultCode
+{
+    int32 errcode = 1;
+    bytes errmsg = 2;
+}
+
+
+// 定义登录请求消息类型 name pwd
+message LoginRequest
+{
+    bytes name = 1;
+    bytes pwd = 2;
+}
+
+// 定义登录响应消息类型
+message LoginResponse
+{
+    ResultCode result = 1;
+    // int32 errcode = 1;
+    // bytes errmsg = 2;
+    bool success = 3;
+}
+
+message GetFriendListsRequest
+{
+    uint32 userid = 1;  // 获取谁的请求
+}
+
+message User
+{
+    bytes name =1;
+    uint32 age = 2;
+    enum  Sex  // 枚举写法注意
+    {
+        MAN=0;
+        WOMAN=1;
+    }
+    Sex sex=3;
+}
+
+message GetFriendListsResponse
+{
+    // int32 errcode = 1;  // 代码重复
+    // bytes errmsg = 2;
+    ResultCode result = 1;
+    repeated User friend_list=2; // 定义了一个列表类型,  这个_list没啥特殊意义
+}
+
+// 在protobuf 定义描述 rpc类型
+service UserServiceRpc {
+    rpc Login(LoginRequest) returns (LoginResponse);
+    rpc GetFriendList(GetFriendListsRequest) returns (GetFriendListsResponse);
+  }
+  
+

@@ -61,3 +61,9 @@ MprpcApplication& MprpcApplication::GetInstance()
     static MprpcApplication app;  // 静态局部变量, 只会被初始化一次
     return app;
 }
+
+// 获取配置文件对象
+MprpcConfig &MprpcApplication::GetConfig()
+{
+    return m_config; // 返回配置文件对象
+}

@@ -39,5 +39,8 @@ private:
     
     // 存储服务对象的容器
     std::unordered_map<std::string, ServiceInfo> m_serviceMap; // 服务名和服务对象的映射关系
-    
+
+    // 设置rpc回调函数 --- closuer 回调操作, 用于 序列化和网络发送
+    void SendRpcResponse(const muduo::net::TcpConnectionPtr &conn, // 连接对象
+                         google::protobuf::Message *response); // 响应对象
 };

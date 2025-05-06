@@ -1,0 +1,31 @@
+syntax = "proto3";
+package hzhrpcfriend;
+
+
+option cc_generic_services = true; // 生成服务类和rpc方法描述, 默认不生成
+
+message ResultCode
+{
+    int32 errcode = 1;
+    bytes errmsg = 2;
+}
+
+
+// 定义登录请求消息类型 name pwd
+message FriendListRequest
+{
+    uint32 id = 1;
+}
+
+// 定义登录响应消息类型
+message FriendListResponse
+{
+    ResultCode result = 1;
+    repeated bytes friends = 2; // 好友列表
+}
+
+
+
+service FriendServiceRpc {
+    rpc GetFriendList_rpc(FriendListRequest) returns (FriendListResponse);
+}

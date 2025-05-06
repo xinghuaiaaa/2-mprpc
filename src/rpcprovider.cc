@@ -71,7 +71,7 @@ void RpcProvider::OnConnection(const muduo::net::TcpConnectionPtr &conn)
     if (!conn->connected()) // 如果连接断开
     {
         conn->shutdown(); // 关闭连接
-        exit(EXIT_FAILURE);
+        // exit(EXIT_FAILURE);
     }
 }
 
@@ -111,9 +111,9 @@ void RpcProvider::OnMessage(const muduo::net::TcpConnectionPtr &conn, // 消息�
     uint32_t args_size = 0;                         // 调用方法所要的参数大小
     if (rpc_header.ParseFromString(rpc_header_str)) // 反序列化数据, 得到rpc请求的 详细信息
     {
-        rpc_header.service_name();                // 获取服务名称
         service_name = rpc_header.service_name(); // 获取服务名称
         method_name = rpc_header.method_name();   // 获取方法名称
+        args_size = rpc_header.args_size();       // 获取方法参数大小
     }
     else
     {

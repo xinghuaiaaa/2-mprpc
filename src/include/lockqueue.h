@@ -10,17 +10,26 @@ class LockQueue
 {
 public:
     // 入队
-    void Push(const T &value);
-
-    // 出队
-    T& Pop();
-
-    // 判断队列是否为空
-    bool Empty()
+    void Push(const T &value)
     {
         std::lock_guard<std::mutex> lock(m_mutex);
-        return m_queue.empty();
+        m_queue.push(value);
+        m_condvariable.notify_one(); // 通知一个等待线程
     }
+
+    // 出队
+    T Pop()
+    {
+        std::unique_lock<std::mutex> lock(m_mutex);
+        while (m_queue.empty())
+        {
+            m_condvariable.wait(lock); // 等待条件变量
+        }
+        T value = m_queue.front();
+        m_queue.pop();
+        return value;
+    }
+
 private:
     std::queue<T> m_queue; // 日志队列
     std::mutex m_mutex; // 互斥锁

@@ -34,7 +34,7 @@ private:
 #define LOG_INFO(logmsgformat, ...) \
     do { \
         Logger &logger = Logger::GetInstance(); \
-        Logger.SetLogLevel(INFO); \
+        logger.SetLogLevel(INFO); \
         char logmsg[1024] = {0}; \
         snprintf(logmsg, sizeof(logmsg), logmsgformat, ##__VA_ARGS__); \
         logger.Log(logmsg); \
@@ -42,9 +42,11 @@ private:
 
 #define LOG_ERROR(logmsgformat, ...) \
     do { \
+        Logger &logger = Logger::GetInstance(); \
+        logger.SetLogLevel(ERROR); \
         char logmsg[1024] = {0}; \
-        snprintf(logmsg, sizeof(logmsg), logformat, ##__VA_ARGS__); \
-        Logger::GetInstance().Log(logmsg); \
+        snprintf(logmsg, sizeof(logmsg), logmsgformat, ##__VA_ARGS__); \
+        logger.Log(logmsg); \
     } while (0)
 
 

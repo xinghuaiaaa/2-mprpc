@@ -39,10 +39,11 @@ Logger::Logger()
 
         // 把时间也写入
         char timeBuf[64] = {0};
-        sprintf(timeBuf, "%d-%d-%d %d:%d:%d",
+        sprintf(timeBuf, "%d-%d-%d %d:%d:%d ===>[%s]",
                 nowtm->tm_year + 1900, nowtm->tm_mon + 1, nowtm->tm_mday,
-                nowtm->tm_hour, nowtm->tm_min, nowtm->tm_sec);
+                nowtm->tm_hour, nowtm->tm_min, nowtm->tm_sec, m_logLevel == INFO ? "INFO" : "ERROR");
         logMessage.insert(0, timeBuf); // 在日志信息前面插入时间
+        logMessage.append("\n"); // 添加换行符
 
         fputs(logMessage.c_str(), fp); // 写入文件
 

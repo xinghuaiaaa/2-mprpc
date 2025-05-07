@@ -4,6 +4,8 @@
 
 #include "rpcheader.pb.h" // 这个头文件里有 RpcHeader
 
+#include "logger.h" // 日志打印
+
 // 这里是框架提供给外部使用的, 可以发布rpc方法的函数接口
 void RpcProvider::NotifyService(google::protobuf::Service *server)
 {
@@ -15,7 +17,8 @@ void RpcProvider::NotifyService(google::protobuf::Service *server)
     // 获取服务名称
     std::string service_name = pserviceDesc->name(); // 获取服务名称
 
-    std::cout << "service_name: " << service_name << std::endl;
+    // std::cout << "service_name: " << service_name << std::endl;
+    LOG_INFO("service_name: %s", service_name.c_str()); // 打印服务名称
 
     // 获取服务方法数量
     int method_count = pserviceDesc->method_count(); // 获取服务方法数量
@@ -30,7 +33,8 @@ void RpcProvider::NotifyService(google::protobuf::Service *server)
 
         service_info.m_methodMap.insert({method_name, pMethodDesc}); // 将方法名称和方法描述对象的映射关系存入容器
 
-        std::cout << "method_name: " << method_name << std::endl;
+        // std::cout << "method_name: " << method_name << std::endl;
+        LOG_INFO("method_name: %s", method_name.c_str()); // 打印方法名称
     }
     service_info.m_service = server; // 将服务对象存入容器
     // 将服务名称和服务对象存入容器

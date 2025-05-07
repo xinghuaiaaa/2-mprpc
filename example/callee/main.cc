@@ -1,8 +1,14 @@
 #include "friendservice.h"
 #include "userservice.h"
+#include "logger.h"
 
 int main(int argc, char *argv[])
 {
+    // 日志
+    LOG_INFO("main function start");
+    LOG_ERROR("%s: %s: %d", __FILE__, __FUNCTION__, __LINE__);
+
+
     // 1. 初始化框架
     MprpcApplication::Init(argc, argv);
 

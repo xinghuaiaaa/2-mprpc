@@ -66,7 +66,7 @@ std::string MprpcConfig::Load(const std::string &key)
     auto it = m_configMap.find(key); // 查找键
     if (it == m_configMap.end())     // 如果没有找到
     {
-        std::cout << "error: key is not exist" << std::endl;
+        std::cout << "error: test.conf key is not exist" << std::endl;
         return "";
     }
     return it->second; // 返回值

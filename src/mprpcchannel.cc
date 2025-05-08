@@ -12,6 +12,8 @@
 
 #include "mprpcapplication.h"
 
+#include "zookeeperunit.h"
+
 
 /*
 服务端收到的数据格式为:
@@ -35,8 +37,12 @@ void MpRpcChannel::CallMethod(const google::protobuf::MethodDescriptor *method,
 
     if(!request->SerializeToString(&args_str)) // 将请求参数序列化为字符串
     {
-        // 序列化失败
-        std::cout << "request serialize error" << std::endl;
+        // // 序列化失败
+        // std::cout << "request serialize error" << std::endl;
+
+        // 控制模块
+        controller->SetFailed("request serialize error"); // 设置失败
+
         return;
     }
     else
@@ -89,10 +95,32 @@ void MpRpcChannel::CallMethod(const google::protobuf::MethodDescriptor *method,
         exit(EXIT_FAILURE);
     }
 
-    // 获取配置文件对象
-    MprpcConfig config = MprpcApplication::GetConfig(); // 获取配置文件对象
-    std::string server_ip = config.Load("rpcserverip"); // 获取服务器ip
-    uint16_t server_port = atoi(config.Load("rpcserverport").c_str()); // 获取服务器端口号
+    // // 获取配置文件对象
+    // MprpcConfig config = MprpcApplication::GetConfig(); // 获取配置文件对象
+    // std::string server_ip = config.Load("rpcserverip"); // 获取服务器ip
+    // uint16_t server_port = atoi(config.Load("rpcserverport").c_str()); // 获取服务器端口号
+    
+    // 修改为 zk =====================================
+    ZkClient zkcli; // 创建zkclient对象
+    zkcli.Start(); // 连接zkserver
+    //     /UserService/Login
+    std::string method_path = "/" + service_name + "/" + method_name; // 拼接服务名称和方法名称
+    std::string host_data = zkcli.GetData(method_path.c_str()); // 获取服务名称和方法名称对应的ip和端口号
+
+    if(host_data.empty()) // 如果获取失败
+    {
+        controller->SetFailed("get host data error"); // 设置失败
+    }
+
+    int idx = host_data.find(':'); // 查找第一个冒号的位置
+    if(idx == std::string::npos) // 如果没有找到
+    {
+        controller->SetFailed("get host data error"); // 设置失败
+    }
+    std::string server_ip = host_data.substr(0, idx); // 获取ip地址
+    uint16_t server_port = atoi(host_data.substr(idx+1).c_str()); // 获取端口号
+
+    // zk ======================================================
 
     // 设置服务器地址
     struct sockaddr_in server_addr; // 定义服务器地址
@@ -104,9 +132,12 @@ void MpRpcChannel::CallMethod(const google::protobuf::MethodDescriptor *method,
     // 连接服务器
     if(connect(clientfd, (struct sockaddr *)&server_addr, sizeof(server_addr)) == -1) // 连接服务器失败
     {
-        std::cout << "client connect error" << std::endl;
+        // std::cout << "client connect error" << std::endl;
+        char errstr[1024] = {0}; // 定义错误字符串
+        snprintf(errstr, sizeof(errstr), "client connect error, errno: %d, errstr: %s", errno, strerror(errno)); // 获取错误信息
+        controller->SetFailed(errstr); // 设置失败
         close(clientfd); // 关闭socket
-        exit(EXIT_FAILURE);
+        return;
     }
 
     // 连接成功
@@ -115,7 +146,7 @@ void MpRpcChannel::CallMethod(const google::protobuf::MethodDescriptor *method,
     {
         std::cout << "client send error" << std::endl;
         close(clientfd); // 关闭socket
-        exit(EXIT_FAILURE);
+        return; // 直接返回  结束一次 rpc调用
     }
     else if(len < (int)send_rpc_str.size()) // 发送数据不完整
     {

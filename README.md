@@ -7,3 +7,9 @@
 >abseil
 >protobuf
 >zookeeper
+
+
+```
+chmod 777 autobuild.sh
+./autobuild.sh
+```

@@ -6,6 +6,8 @@
 
 #include "logger.h" // 日志打印
 
+#include "zookeeperunit.h" // zkclient
+
 // 这里是框架提供给外部使用的, 可以发布rpc方法的函数接口
 void RpcProvider::NotifyService(google::protobuf::Service *server)
 {
@@ -46,20 +48,46 @@ void RpcProvider::Run()
 {
     std::string ip = MprpcApplication::GetInstance().GetConfig().Load("rpcserverip");
     uint16_t port = atoi(MprpcApplication::GetInstance().GetConfig().Load("rpcserverport").c_str());
+    std::cout << "rpcserverip: " << ip << std::endl;
+    std::cout << "rpcserverport: " << port << std::endl;
 
     muduo::net::InetAddress addr(ip, port); // 绑定ip和端口号
 
     // 创建TcpServer对象
     muduo::net::TcpServer server(&m_eventLoop, addr, "RpcProvider");
 
-    // 设置线程数量
-    server.setThreadNum(4);
+    
 
     // 设置连接回调函数
     server.setConnectionCallback(std::bind(&RpcProvider::OnConnection, this, std::placeholders::_1));
 
     // 设置消息回调函数
     server.setMessageCallback(std::bind(&RpcProvider::OnMessage, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
+
+    // 设置线程数量
+    server.setThreadNum(4);
+
+    // 把当前rpc节点上要发布的服务 全部注册到 zk 上, 让rpc client可以从 zk上获取到
+    // session timeout: 30s  zkclient 网络io线程  1/3*timeout 发送心跳包 ping
+    ZkClient zkcli;
+    zkcli.Start(); // 连接zkserver
+    // service_name: 为永久节点    method_name: 为临时节点
+    for (auto it = m_serviceMap.begin(); it != m_serviceMap.end(); ++it)
+    {
+        // 创建永久节点
+        std::string service_path = "/" + it->first; // 服务名称
+        zkcli.Create(service_path.c_str(), nullptr, 0); // 创建永久节点
+
+        // 创建临时节点
+        for (auto mit = it->second.m_methodMap.begin(); mit != it->second.m_methodMap.end(); ++mit)
+        {
+            std::string method_path = service_path + "/" + mit->first; // 方法名称
+            char method_path_data[256] = {0};
+            sprintf(method_path_data, "%s:%d", ip.c_str(), port); // 拼接ip和端口号
+            zkcli.Create(method_path.c_str(), method_path_data, sizeof(method_path_data), ZOO_EPHEMERAL); // 创建临时节点
+        }
+    }
+
 
     std::cout << "RpcProvider start service " << std::endl;
 
